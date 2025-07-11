@@ -1,0 +1,40 @@
+name: Create Release Tarball
+
+on:
+  push:
+    branches:
+      - master
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install GitHub CLI
+      run: sudo apt-get update && sudo apt-get install -y gh
+
+    - name: Create tarballs for each theme directory
+      run: |
+        for d in */ ; do
+          dir=${d%/}
+          tar -czf "$dir.tar.gz" "$dir"
+        done
+
+    - name: Upload tarballs as artifacts (for master branch pushes)
+      if: github.event_name == 'push'
+      uses: actions/upload-artifact@v3
+      with:
+        name: theme-tarballs
+        path: "*.tar.gz"
+
+    - name: Create GitHub Release and upload tarballs (for tagged releases)
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        tag="${GITHUB_REF#refs/tags/}"
+        gh release upload "$tag" *.tar.gz --clobber
