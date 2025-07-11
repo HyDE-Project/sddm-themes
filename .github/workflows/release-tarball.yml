@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - master
-  release:
-    types: [created]
 
 jobs:
   build:
@@ -30,14 +28,6 @@ jobs:
       with:
         name: theme-tarballs
         path: "*.tar.gz"
-
-    - name: Create GitHub Release and upload tarballs (for tagged releases)
-      if: github.event_name == 'release'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        tag="${GITHUB_REF#refs/tags/}"
-        gh release upload "$tag" *.tar.gz --clobber
 
     - name: Create or update GitHub Release for master
       if: github.ref == 'refs/heads/master'
