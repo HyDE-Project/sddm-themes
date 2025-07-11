@@ -43,5 +43,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         tag="${GITHUB_REF#refs/tags/}"
-        gh release view "$tag" || gh release create "$tag" --title "$tag" --generate-notes
+        gh release view "$tag" || gh release create "$tag" --title "$tag" --notes "Release $tag"
         gh release upload "$tag" *.tar.gz --clobber
