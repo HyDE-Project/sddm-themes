@@ -26,7 +26,7 @@ jobs:
 
     - name: Upload tarballs as artifacts (for master branch pushes)
       if: github.event_name == 'push'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: theme-tarballs
         path: "*.tar.gz"
