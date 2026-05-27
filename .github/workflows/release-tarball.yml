@@ -31,15 +31,18 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: theme-archives
-        path: "*.tar.gz\n*.tar.xz\n*.zip"
+        path: |
+          *.tar.gz
+          *.tar.xz
+          *.zip
 
     - name: Create or update GitHub Release for master
       if: github.ref == 'refs/heads/master'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release view master-release || gh release create master-release --title "master-release" --notes "Latest master branch archives"
-        gh release upload master-release *.tar.gz *.tar.xz *.zip --clobber
+        gh release view latest || gh release create latest --title "latest" --notes "Latest master branch archives"
+        gh release upload latest *.tar.gz *.tar.xz *.zip --clobber
 
     - name: Create or update GitHub Release for tags
       if: startsWith(github.ref, 'refs/tags/')
