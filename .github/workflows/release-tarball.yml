@@ -13,29 +13,33 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Install GitHub CLI
-      run: sudo apt-get update && sudo apt-get install -y gh
+      run: sudo apt-get update && sudo apt-get install -y gh zip
 
-    - name: Create tarballs for each theme directory
+    - name: Create archives for each theme directory
       run: |
         for d in */ ; do
           dir=${d%/}
-          tar -czf "$dir.tar.xz" "$dir"
+          # gzip
+          tar -czf "$dir.tar.gz" "$dir"
+          # xz
+          tar -cJf "$dir.tar.xz" "$dir"
+          # zip
+          zip -r "$dir.zip" "$dir"
         done
 
-    - name: Upload tarballs as artifacts (for master branch pushes)
-      if: github.event_name == 'push'
+    - name: Upload artifacts (all formats)
       uses: actions/upload-artifact@v4
       with:
-        name: theme-tarballs
-        path: "*.tar.xz"
+        name: theme-archives
+        path: "*.tar.gz\n*.tar.xz\n*.zip"
 
     - name: Create or update GitHub Release for master
       if: github.ref == 'refs/heads/master'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release view master-release || gh release create master-release --title "master-release" --notes "Latest master branch tarballs"
-        gh release upload master-release *.tar.xz --clobber
+        gh release view master-release || gh release create master-release --title "master-release" --notes "Latest master branch archives"
+        gh release upload master-release *.tar.gz *.tar.xz *.zip --clobber
 
     - name: Create or update GitHub Release for tags
       if: startsWith(github.ref, 'refs/tags/')
@@ -44,4 +48,4 @@ jobs:
       run: |
         tag="${GITHUB_REF#refs/tags/}"
         gh release view "$tag" || gh release create "$tag" --title "$tag" --notes "Release $tag"
-        gh release upload "$tag" *.tar.xz --clobber
+        gh release upload "$tag" *.tar.gz *.tar.xz *.zip --clobber
