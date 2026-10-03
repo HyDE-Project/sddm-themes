@@ -16,8 +16,10 @@ Column {
         font.bold: config.DateIsBold == "true" ? true : false
         color: config.DateColor
                 
+        // A blank DateFormat/TimeFormat in theme.conf means "follow the system
+        // locale"; Qt would render a blank format as an empty string.
         function updateDate() {
-            text = new Date().toLocaleDateString(Qt.locale(), config.DateFormat)
+            text = new Date().toLocaleDateString(Qt.locale(), config.DateFormat ? config.DateFormat : Locale.LongFormat)
         }
     }
 
@@ -34,7 +36,7 @@ Column {
         color: config.TimeColor
 
         function updateTime() {
-            text = new Date().toLocaleTimeString(Qt.locale(), config.TimeFormat)
+            text = new Date().toLocaleTimeString(Qt.locale(), config.TimeFormat ? config.TimeFormat : Locale.ShortFormat)
         }
     }
 
