@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -41,7 +43,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release view latest || gh release create latest --title "latest" --notes "Latest master branch archives"
+        if gh release view latest >/dev/null 2>&1; then
+          gh release edit latest --title "latest" --notes "Latest master branch archives (Updated $(date -u +'%Y-%m-%d %H:%M UTC'))" --target master
+        else
+          gh release create latest --title "latest" --notes "Latest master branch archives" --target master
+        fi
         gh release upload latest *.tar.gz *.tar.xz *.zip --clobber
 
     - name: Create or update GitHub Release for tags
@@ -50,5 +56,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         tag="${GITHUB_REF#refs/tags/}"
-        gh release view "$tag" || gh release create "$tag" --title "$tag" --notes "Release $tag"
+        if gh release view "$tag" >/dev/null 2>&1; then
+          gh release edit "$tag" --title "$tag" --notes "Release $tag"
+        else
+          gh release create "$tag" --title "$tag" --notes "Release $tag"
+        fi
         gh release upload "$tag" *.tar.gz *.tar.xz *.zip --clobber
